@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * Created by LaunchCode
@@ -30,43 +31,42 @@ public class CheeseController {
 
     // Request path: /cheese
     @RequestMapping(value = "")
-    public String index(Model model) {
+    public String index(Model template) {
 
-        model.addAttribute("cheeses", cheeseDao.findAll());
-        model.addAttribute("title", "My Cheeses");
+        template.addAttribute("cheeses", cheeseDao.findAll());
+        template.addAttribute("title", "My Cheeses");
 
         return "cheese/index";
     }
 
     @RequestMapping(value = "add", method = RequestMethod.GET)
-    public String displayAddCheeseForm(Model model) {
-        model.addAttribute("title", "Add Cheese");
-        model.addAttribute(new Cheese());
-        model.addAttribute("categories", categoryDAO.findAll());
+    public String displayAddCheeseForm(Model template) {
+        template.addAttribute("title", "Add Cheese");
+        template.addAttribute(new Cheese());
+        template.addAttribute("categories", categoryDAO.findAll());
         return "cheese/add";
     }
 
     @RequestMapping(value = "add", method = RequestMethod.POST)
     public String processAddCheeseForm(@ModelAttribute  @Valid Cheese newCheese,
-                                       Errors errors, @RequestParam int categoryId, Model model) {
+                                       Errors errors, @RequestParam int categoryId, Model template) {
 
         if (errors.hasErrors()) {
-            model.addAttribute("title", "Add Cheese");
-            model.addAttribute("categories", categoryDAO.findAll());
+            template.addAttribute("title", "Add Cheese");
+            template.addAttribute("categories", categoryDAO.findAll());
             return "cheese/add";
         }
 
         Category cat = categoryDAO.findOne(categoryId);
-        System.out.println(cat.getId());
         newCheese.setCategory(cat);
         cheeseDao.save(newCheese);
         return "redirect:";
     }
 
     @RequestMapping(value = "remove", method = RequestMethod.GET)
-    public String displayRemoveCheeseForm(Model model) {
-        model.addAttribute("cheeses", cheeseDao.findAll());
-        model.addAttribute("title", "Remove Cheese");
+    public String displayRemoveCheeseForm(Model template) {
+        template.addAttribute("cheeses", cheeseDao.findAll());
+        template.addAttribute("title", "Remove Cheese");
         return "cheese/remove";
     }
 
@@ -78,6 +78,15 @@ public class CheeseController {
         }
 
         return "redirect:";
+    }
+
+    @RequestMapping(value = "category", method = RequestMethod.GET)
+    public String category(Model template, @RequestParam int id) {
+        Category cat = categoryDAO.findOne(id);
+        List<Cheese> cheeses = cat.getCheeses();
+        template.addAttribute("cheeses", cheeses);
+        template.addAttribute("title", "Cheeses in Category: " + cat.getName());
+        return "cheese/index";
     }
 
 }

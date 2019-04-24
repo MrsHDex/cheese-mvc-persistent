@@ -2,10 +2,12 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org/">
 <head th:replace="fragments :: head"></head>
 <body>
+<h1 th:text="${title}">Default Title</h1>
 <th:block th:replace="fragments :: navigation"></th:block>
 <ul>
-    <li th:each="category : ${categories}" th:text="${category.name}"
-    ></li>
+    <li th:each="category : ${categories}">
+    <a th:href="'/cheese/category/'+${category.id}" th:text="${category.name}"></a>
+    </li>
 </ul>
 <nav th:fragment="navigation">
     <a href="/category/add">Add Category</a>
